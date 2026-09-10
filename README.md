@@ -4,65 +4,65 @@ Assistente da Alps Oral Clinic com Node.js, Express, WhatsApp Cloud API e OpenAI
 
 ## Estado em 10/09/2026
 
-- RepositÃ³rio: https://github.com/matioly/assistente_alps â€” branch `main`.
-- ServiÃ§o Railway: `assistente_alps`, Dockerfile com Node 22 Alpine, uma rÃ©plica.
+- Repositório: https://github.com/matioly/assistente_alps — branch `main`.
+- Serviço Railway: `assistente_alps`, Dockerfile com Node 22 Alpine, uma réplica.
 - URL: https://assistentealps-production.up.railway.app
 - Callback: https://assistentealps-production.up.railway.app/webhook
-- A URL pÃºblica jÃ¡ retornou **Servidor Alps Atendimento funcionando!**, apÃ³s corrigir a escuta para `0.0.0.0`.
-- Conversa completa pelo WhatsApp validada localmente apÃ³s assinar o aplicativo na WABA.
-- Ãšltima aÃ§Ã£o informada: trocar o callback Meta para Railway. **Falta registrar a confirmaÃ§Ã£o da resposta completa pelo Railway.**
-- NÃºmero oficial da clÃ­nica ainda nÃ£o conectado. O bot permanece restrito ao celular pessoal autorizado para teste.
+- A URL pública já retornou **Servidor Alps Atendimento funcionando!**, após corrigir a escuta para `0.0.0.0`.
+- Conversa completa pelo WhatsApp validada localmente após assinar o aplicativo na WABA.
+- Última ação informada: trocar o callback Meta para Railway. **Falta registrar a confirmação da resposta completa pelo Railway.**
+- Número oficial da clínica ainda não conectado. O bot permanece restrito ao celular pessoal autorizado para teste.
 
-Hospedagem concluÃ­da nÃ£o significa atendimento a pacientes liberado. A prÃ³xima sessÃ£o deve comeÃ§ar pelo teste completo no Railway.
+Hospedagem concluída não significa atendimento a pacientes liberado. A próxima sessão deve começar pelo teste completo no Railway.
 
 ## Arquitetura e arquivos
 
-A Meta entrega mensagens por POST HTTPS. O servidor valida assinatura, telefone e remetente, processa uma fila em memÃ³ria, consulta a OpenAI e envia a resposta pela Cloud API.
+A Meta entrega mensagens por POST HTTPS. O servidor valida assinatura, telefone e remetente, processa uma fila em memória, consulta a OpenAI e envia a resposta pela Cloud API.
 
-| Arquivo | FunÃ§Ã£o |
+| Arquivo | Função |
 | --- | --- |
-| `server.js` | HTTP, webhook, assinatura HMAC, filtros, histÃ³rico, fila e resposta |
+| `server.js` | HTTP, webhook, assinatura HMAC, filtros, histórico, fila e resposta |
 | `instrucoes.js` | Prompt efetivamente importado pelo servidor |
 | `assinar-whatsapp.js` | Assina aplicativo na WABA via POST em `/{WABA_ID}/subscribed_apps` |
 | `simulador.js` | Simulador inicial no terminal |
-| `simulador-ia.js`, `instrucoes-ia.js` | Scripts de simulaÃ§Ã£o com instruÃ§Ãµes prÃ³prias; nÃ£o sÃ£o importados pelo servidor |
+| `simulador-ia.js`, `instrucoes-ia.js` | Scripts de simulação com instruções próprias; não são importados pelo servidor |
 | `Dockerfile` | Node 22 Alpine, `npm ci --omit=dev`, `npm start` |
-| `package.json`, `package-lock.json` | DependÃªncias e comandos; projeto CommonJS |
+| `package.json`, `package-lock.json` | Dependências e comandos; projeto CommonJS |
 
-## VariÃ¡veis
+## Variáveis
 
-Localmente usar `.env`; na hospedagem usar **Railway â†’ Variables**. NÃ£o versionar valores secretos. O `.env` local nÃ£o Ã© enviado automaticamente ao Railway.
+Localmente usar `.env`; na hospedagem usar **Railway → Variables**. Não versionar valores secretos. O `.env` local não é enviado automaticamente ao Railway.
 
-| VariÃ¡vel | ConteÃºdo / finalidade |
+| Variável | Conteúdo / finalidade |
 | --- | --- |
-| `PORT` | `3000`, igual Ã  porta de destino do domÃ­nio |
-| `WEBHOOK_VERIFY_TOKEN` | Valor escolhido por nÃ³s, idÃªntico ao campo de verificaÃ§Ã£o na Meta |
+| `PORT` | `3000`, igual à porta de destino do domínio |
+| `WEBHOOK_VERIFY_TOKEN` | Valor escolhido por nós, idêntico ao campo de verificação na Meta |
 | `META_APP_SECRET` | Segredo do aplicativo Meta, usado para validar o HMAC dos POSTs |
-| `OPENAI_MODEL` | ConfiguraÃ§Ã£o atual: `gpt-4.1-mini` |
+| `OPENAI_MODEL` | Configuração atual: `gpt-4.1-mini` |
 | `OPENAI_API_KEY` | Chave OpenAI |
-| `WHATSAPP_PHONE_NUMBER_ID` | ID do telefone remetente da API; nÃ£o Ã© o telefone nem o WABA ID |
-| `WHATSAPP_TEST_RECIPIENT` | Celular pessoal autorizado, somente dÃ­gitos com paÃ­s e DDD; nÃ£o Ã© o nÃºmero da clÃ­nica |
-| `WHATSAPP_ACCESS_TOKEN` | Token completo Meta para chamadas de saÃ­da e assinatura da conta |
-| `WHATSAPP_API_VERSION` | ConfiguraÃ§Ã£o atual: `v26.0` |
-| `WHATSAPP_BUSINESS_ACCOUNT_ID` | WABA ID, necessÃ¡rio apenas para o script de assinatura |
+| `WHATSAPP_PHONE_NUMBER_ID` | ID do telefone remetente da API; não é o telefone nem o WABA ID |
+| `WHATSAPP_TEST_RECIPIENT` | Celular pessoal autorizado, somente dígitos com país e DDD; não é o número da clínica |
+| `WHATSAPP_ACCESS_TOKEN` | Token completo Meta para chamadas de saída e assinatura da conta |
+| `WHATSAPP_API_VERSION` | Configuração atual: `v26.0` |
+| `WHATSAPP_BUSINESS_ACCOUNT_ID` | WABA ID, necessário apenas para o script de assinatura |
 
-O servidor exige as credenciais da tabela exceto WABA ID; `PORT` e `OPENAI_MODEL` possuem padrÃµes. O verify token confirma o callback e nÃ£o tem expiraÃ§Ã£o implementada no cÃ³digo. O access token autoriza chamadas Ã  API; acompanhar sua validade e planejar credencial operacional antes de uso contÃ­nuo.
+O servidor exige as credenciais da tabela exceto WABA ID; `PORT` e `OPENAI_MODEL` possuem padrões. O verify token confirma o callback e não tem expiração implementada no código. O access token autoriza chamadas à API; acompanhar sua validade e planejar credencial operacional antes de uso contínuo.
 
-### Identificadores de teste (nÃ£o sÃ£o segredos)
+### Identificadores de teste (não são segredos)
 
 | Item | Valor |
 | --- | --- |
 | Aplicativo | Alps Atendimento |
 | App ID | `1051411227659862` |
-| NÃºmero Meta de teste | `+1 (555) 201-0524` |
+| Número Meta de teste | `+1 (555) 201-0524` |
 | Phone Number ID | `1248663335005516` |
 | WABA ID | `2155430935315740` |
 
-O celular pessoal foi omitido deste README pÃºblico. Consultar as variÃ¡veis privadas. NÃ£o reutilizar automaticamente os IDs de teste na conexÃ£o do nÃºmero oficial.
+O celular pessoal foi omitido deste README público. Consultar as variáveis privadas. Não reutilizar automaticamente os IDs de teste na conexão do número oficial.
 
 ## Desenvolvimento local
 
-Usar preferencialmente Node 22, alinhado ao Dockerfile; o desenvolvimento inicial tambÃ©m funcionou em Node 24.
+Usar preferencialmente Node 22, alinhado ao Dockerfile; o desenvolvimento inicial também funcionou em Node 24.
 
 ```powershell
 git clone https://github.com/matioly/assistente_alps.git
@@ -70,27 +70,27 @@ cd assistente_alps
 npm ci
 ```
 
-Criar `.env` com as variÃ¡veis acima e executar:
+Criar `.env` com as variáveis acima e executar:
 
 ```powershell
 npm start
-# Alternativa com reinÃ­cio ao salvar:
+# Alternativa com reinício ao salvar:
 npm run dev
 ```
 
-Abrir `http://localhost:3000`. O projeto usa `require` e CommonJS. NÃ£o mudar para mÃ³dulos ES apenas para corrigir um `await`: usar funÃ§Ã£o `async`, como no script de assinatura.
+Abrir `http://localhost:3000`. O projeto usa `require` e CommonJS. Não mudar para módulos ES apenas para corrigir um `await`: usar função `async`, como no script de assinatura.
 
-Para webhooks locais foi usado `cloudflared tunnel --url http://127.0.0.1:3000`. Cada URL temporÃ¡ria nova exige atualizar o callback. O Railway substitui esse tÃºnel e o Node local no atendimento hospedado. ApÃ³s validar o callback hospedado, o computador pode ser desligado.
+Para webhooks locais foi usado `cloudflared tunnel --url http://127.0.0.1:3000`. Cada URL temporária nova exige atualizar o callback. O Railway substitui esse túnel e o Node local no atendimento hospedado. Após validar o callback hospedado, o computador pode ser desligado.
 
-## Railway e publicaÃ§Ã£o
+## Railway e publicação
 
-1. ServiÃ§o conectado ao GitHub, branch `main`, build pelo Dockerfile.
+1. Serviço conectado ao GitHub, branch `main`, build pelo Dockerfile.
 2. Configurar credenciais em **Variables**, incluindo `PORT=3000`.
-3. Manter a porta do domÃ­nio em `3000` e `app.listen(porta, "0.0.0.0", ...)`.
-4. ApÃ³s o push, conferir o novo deploy e seu commit em **Deployments**.
-5. **Build Logs** mostram construÃ§Ã£o da imagem; **Deploy Logs** mostram o Node e os webhooks. Status Active sozinho nÃ£o comprova que HTTP responde.
+3. Manter a porta do domínio em `3000` e `app.listen(porta, "0.0.0.0", ...)`.
+4. Após o push, conferir o novo deploy e seu commit em **Deployments**.
+5. **Build Logs** mostram construção da imagem; **Deploy Logs** mostram o Node e os webhooks. Status Active sozinho não comprova que HTTP responde.
 
-Plano escolhido: Hobby. Conferir consumo e cobranÃ§a no painel; OpenAI tem cobranÃ§a separada.
+Plano escolhido: Hobby. Conferir consumo e cobrança no painel; OpenAI tem cobrança separada.
 
 ```powershell
 git add README.md
@@ -98,84 +98,84 @@ git commit -m "docs: documenta Railway e continuidade"
 git push origin main
 ```
 
-Para cÃ³digo, adicionar explicitamente os arquivos modificados. Conferir `git status` e `git diff --cached` antes do commit. Nunca adicionar `.env` ou segredos. Em builds Docker locais, garantir que `.dockerignore` exclua `.env`, variantes com segredos, `.git` e `node_modules`: o Dockerfile usa `COPY . .`.
+Para código, adicionar explicitamente os arquivos modificados. Conferir `git status` e `git diff --cached` antes do commit. Nunca adicionar `.env` ou segredos. Em builds Docker locais, garantir que `.dockerignore` exclua `.env`, variantes com segredos, `.git` e `node_modules`: o Dockerfile usa `COPY . .`.
 
 ## Meta: callback e WABA
 
-1. Na configuraÃ§Ã£o de webhooks, usar a URL Railway com `/webhook`.
+1. Na configuração de webhooks, usar a URL Railway com `/webhook`.
 2. Informar o mesmo `WEBHOOK_VERIFY_TOKEN` do Railway e verificar/salvar.
-3. Conferir assinatura do campo `messages`. Certificado de cliente ficou desativado nesta implantaÃ§Ã£o.
-4. O aplicativo tambÃ©m precisa estar assinado na WABA correta.
+3. Conferir assinatura do campo `messages`. Certificado de cliente ficou desativado nesta implantação.
+4. O aplicativo também precisa estar assinado na WABA correta.
 
-**Problema jÃ¡ resolvido:** mensagens reais apareciam no painel Meta, mas somente eventos sintÃ©ticos chegavam ao Node. A correÃ§Ã£o foi assinar o aplicativo na WABA com o script abaixo. A assinatura da conta de teste jÃ¡ foi concluÃ­da; nÃ£o repetir a cada deploy.
+**Problema já resolvido:** mensagens reais apareciam no painel Meta, mas somente eventos sintéticos chegavam ao Node. A correção foi assinar o aplicativo na WABA com o script abaixo. A assinatura da conta de teste já foi concluída; não repetir a cada deploy.
 
-Para uma nova WABA, configurar ID e token com acesso Ã  conta e executar conscientemente:
+Para uma nova WABA, configurar ID e token com acesso à conta e executar conscientemente:
 
 ```powershell
 node assinar-whatsapp.js
 ```
 
-Esperado: `Aplicativo assinado na conta WhatsApp: true`. Este comando altera a assinatura na Meta; nÃ£o Ã© uma consulta.
+Esperado: `Aplicativo assinado na conta WhatsApp: true`. Este comando altera a assinatura na Meta; não é uma consulta.
 
-## Teste completo e operaÃ§Ã£o
+## Teste completo e operação
 
-1. Abrir a URL pÃºblica e confirmar a mensagem de funcionamento (valida apenas HTTP).
+1. Abrir a URL pública e confirmar a mensagem de funcionamento (valida apenas HTTP).
 2. Confirmar callback salvo e abrir **Deploy Logs** no Railway.
-3. Do celular permitido, enviar texto ao nÃºmero de teste.
+3. Do celular permitido, enviar texto ao número de teste.
 4. Esperar `[WEBHOOK] POST recebido`, `telefoneCorreto: true` e `destinatarioPermitido: true`.
-5. Confirmar a resposta no celular. `Resposta aceita pela Meta` comprova aceitaÃ§Ã£o, nÃ£o necessariamente entrega.
+5. Confirmar a resposta no celular. `Resposta aceita pela Meta` comprova aceitação, não necessariamente entrega.
 6. Enviar `/novo` para reiniciar a conversa.
 7. Registrar resultado/data aqui; depois encerrar Node local e Cloudflare Tunnel.
 
-O botÃ£o de teste sintÃ©tico da Meta usa IDs fictÃ­cios; filtros `false` sÃ£o esperados nesse teste e nÃ£o justificam retirar a restriÃ§Ã£o de remetente.
+O botão de teste sintético da Meta usa IDs fictícios; filtros `false` são esperados nesse teste e não justificam retirar a restrição de remetente.
 
-## DiagnÃ³stico
+## Diagnóstico
 
 | Sintoma | O que conferir |
 | --- | --- |
-| Application failed to respond | Deploy Logs, escuta `0.0.0.0`, `PORT` e porta do domÃ­nio. `127.0.0.1` foi a causa nesta implantaÃ§Ã£o |
-| Falta configurar variÃ¡vel | Railway Variables e novo deploy; o erro menciona `.env` mesmo na nuvem |
-| GET `/webhook` retorna 403 | Esperado sem os parÃ¢metros de verificaÃ§Ã£o; testar `/` para disponibilidade |
-| Falha ao verificar callback | URL pÃºblica e verify token idÃªntico ao servidor |
-| Teste sintÃ©tico chega; real sÃ³ aparece no painel | Assinatura da WABA correta, campo `messages` e callback |
-| telefoneCorreto false | Comparar metadata.phone_number_id com a variÃ¡vel; dados sintÃ©ticos usam IDs fictÃ­cios |
-| destinatarioPermitido false | Comparar remetente real com variÃ¡vel pessoal de teste |
-| Assinatura invÃ¡lida | App secret correto e corpo bruto preservado para HMAC |
-| POST chega mas atendimento falha | HTTP/CÃ³digo Meta nos logs, validade e acesso das credenciais, disponibilidade da OpenAI |
+| Application failed to respond | Deploy Logs, escuta `0.0.0.0`, `PORT` e porta do domínio. `127.0.0.1` foi a causa nesta implantação |
+| Falta configurar variável | Railway Variables e novo deploy; o erro menciona `.env` mesmo na nuvem |
+| GET `/webhook` retorna 403 | Esperado sem os parâmetros de verificação; testar `/` para disponibilidade |
+| Falha ao verificar callback | URL pública e verify token idêntico ao servidor |
+| Teste sintético chega; real só aparece no painel | Assinatura da WABA correta, campo `messages` e callback |
+| telefoneCorreto false | Comparar metadata.phone_number_id com a variável; dados sintéticos usam IDs fictícios |
+| destinatarioPermitido false | Comparar remetente real com variável pessoal de teste |
+| Assinatura inválida | App secret correto e corpo bruto preservado para HMAC |
+| POST chega mas atendimento falha | HTTP/Código Meta nos logs, validade e acesso das credenciais, disponibilidade da OpenAI |
 | Nenhum POST | Investigar entrega e callback antes da IA; log inicial precede filtros e OpenAI |
-| Cannot find module ./instrucoes | Arquivo `instrucoes.js`, incluindo capitalizaÃ§Ã£o correta em Linux |
+| Cannot find module ./instrucoes | Arquivo `instrucoes.js`, incluindo capitalização correta em Linux |
 | Erro de sintaxe no prompt | Texto deve estar dentro de string JavaScript exportada |
 
-Compartilhar somente logs sem segredos. O tratamento atual de exceÃ§Ãµes Ã© resumido; melhorar diagnÃ³stico sanitizado Ã© uma pendÃªncia.
+Compartilhar somente logs sem segredos. O tratamento atual de exceções é resumido; melhorar diagnóstico sanitizado é uma pendência.
 
 ## Limites atuais
 
 - Apenas um remetente e um Phone Number ID permitidos.
-- Texto apenas; mÃ­dia recebe pedido para escrever.
-- `/novo` limpa histÃ³rico global; entrada mÃ¡xima de 3.000 caracteres.
-- Limite de 40 itens de histÃ³rico (normalmente 20 trocas completas).
-- OpenAI: atÃ© 600 tokens de saÃ­da, timeout de 30 segundos, sem retries do SDK; envio Meta com timeout de 20 segundos.
-- `store: false` na OpenAI nÃ£o representa garantia geral de ausÃªncia de retenÃ§Ã£o por todos os provedores.
-- HistÃ³rico, fila e deduplicaÃ§Ã£o em memÃ³ria; perdidos em reinÃ­cio/deploy. Limpeza dos IDs com mais de 24 horas ocorre na chegada de eventos.
-- HTTP 200 Ã© enviado antes da conclusÃ£o do atendimento; nÃ£o hÃ¡ fila durÃ¡vel. Falhas apÃ³s marcar uma mensagem como recebida podem impedir seu reprocessamento.
-- Uma conversa global: **nÃ£o liberar outros pacientes apenas removendo o filtro**.
-- NÃ£o hÃ¡ agenda, encaminhamento real para recepÃ§Ã£o nem controle de horÃ¡rio em cÃ³digo.
-- `npm test` Ã© um placeholder que falha; nÃ£o hÃ¡ suÃ­te automatizada funcional configurada.
+- Texto apenas; mídia recebe pedido para escrever.
+- `/novo` limpa histórico global; entrada máxima de 3.000 caracteres.
+- Limite de 40 itens de histórico (normalmente 20 trocas completas).
+- OpenAI: até 600 tokens de saída, timeout de 30 segundos, sem retries do SDK; envio Meta com timeout de 20 segundos.
+- `store: false` na OpenAI não representa garantia geral de ausência de retenção por todos os provedores.
+- Histórico, fila e deduplicação em memória; perdidos em reinício/deploy. Limpeza dos IDs com mais de 24 horas ocorre na chegada de eventos.
+- HTTP 200 é enviado antes da conclusão do atendimento; não há fila durável. Falhas após marcar uma mensagem como recebida podem impedir seu reprocessamento.
+- Uma conversa global: **não liberar outros pacientes apenas removendo o filtro**.
+- Não há agenda, encaminhamento real para recepção nem controle de horário em código.
+- `npm test` é um placeholder que falha; não há suíte automatizada funcional configurada.
 
-## PrÃ³ximos passos antes de atender pacientes
+## Próximos passos antes de atender pacientes
 
-- [ ] Confirmar resposta completa pelo Railway apÃ³s trocar callback.
-- [ ] Verificar fluxo oficial de coexistÃªncia para preservar WhatsApp Business usado pela recepÃ§Ã£o antes de registrar/migrar o nÃºmero oficial. A tela comum de adicionar nÃºmero nÃ£o comprova essa preservaÃ§Ã£o.
-- [ ] Verificar telefone com acesso a SMS/ligaÃ§Ã£o na clÃ­nica; avaliar impacto antes de excluir conta ou concluir migraÃ§Ã£o.
+- [ ] Confirmar resposta completa pelo Railway após trocar callback.
+- [ ] Verificar fluxo oficial de coexistência para preservar WhatsApp Business usado pela recepção antes de registrar/migrar o número oficial. A tela comum de adicionar número não comprova essa preservação.
+- [ ] Verificar telefone com acesso a SMS/ligação na clínica; avaliar impacto antes de excluir conta ou concluir migração.
 - [ ] Configurar novos IDs, acesso do token e assinatura na WABA correspondente.
 - [ ] Definir credencial operacional, acompanhamento de validade e custos.
-- [ ] Isolar histÃ³rico por paciente, persistir estado e implementar fila durÃ¡vel, retentativas e idempotÃªncia.
-- [ ] Implementar horÃ¡rio em cÃ³digo: segunda a sexta antes de 09:00 e a partir de 18:15; sÃ¡bados/domingos completos, `America/Sao_Paulo`. Definir feriados. Hoje citar horÃ¡rio no prompt nÃ£o impÃµe essa regra.
-- [ ] Implementar pausa e atendimento humano, acompanhamento de solicitaÃ§Ãµes e eventual integraÃ§Ã£o de agenda.
-- [ ] Revisar prompt com equipe: nome, origem do contato, interesse, uma pergunta por vez, sem repetir informaÃ§Ãµes. Priorizar urgÃªncias; nÃ£o inventar preÃ§o, diagnÃ³stico, disponibilidade ou agendamento.
-- [ ] Definir acesso, retenÃ§Ã£o/exclusÃ£o de dados, polÃ­tica de privacidade e operaÃ§Ã£o de logs.
-- [ ] Criar testes relevantes antes de liberar mÃºltiplos pacientes, incluindo isolamento de conversas e horÃ¡rio.
+- [ ] Isolar histórico por paciente, persistir estado e implementar fila durável, retentativas e idempotência.
+- [ ] Implementar horário em código: segunda a sexta antes de 09:00 e a partir de 18:15; sábados/domingos completos, `America/Sao_Paulo`. Definir feriados. Hoje citar horário no prompt não impõe essa regra.
+- [ ] Implementar pausa e atendimento humano, acompanhamento de solicitações e eventual integração de agenda.
+- [ ] Revisar prompt com equipe: nome, origem do contato, interesse, uma pergunta por vez, sem repetir informações. Priorizar urgências; não inventar preço, diagnóstico, disponibilidade ou agendamento.
+- [ ] Definir acesso, retenção/exclusão de dados, política de privacidade e operação de logs.
+- [ ] Criar testes relevantes antes de liberar múltiplos pacientes, incluindo isolamento de conversas e horário.
 
 ## Contexto para retomar
 
-> Leia este README e o cÃ³digo atual. HTTP jÃ¡ funciona no Railway; atendimento WhatsApp local foi validado apÃ³s assinatura da WABA. Confirme o teste completo no Railway. O bot continua restrito a um destinatÃ¡rio, com histÃ³rico global em memÃ³ria e sem controle de horÃ¡rio em cÃ³digo. A prÃ³xima etapa Ã© conectar o nÃºmero oficial preservando o WhatsApp Business da recepÃ§Ã£o e preparar isolamento por paciente, persistÃªncia, horÃ¡rio e atendimento humano. NÃ£o reutilize IDs de teste no nÃºmero oficial nem exponha credenciais.
+> Leia este README e o código atual. HTTP já funciona no Railway; atendimento WhatsApp local foi validado após assinatura da WABA. Confirme o teste completo no Railway. O bot continua restrito a um destinatário, com histórico global em memória e sem controle de horário em código. A próxima etapa é conectar o número oficial preservando o WhatsApp Business da recepção e preparar isolamento por paciente, persistência, horário e atendimento humano. Não reutilize IDs de teste no número oficial nem exponha credenciais.
