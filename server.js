@@ -4,6 +4,9 @@ const express = require("express");
 const crypto = require("node:crypto");
 const OpenAI = require("openai");
 const instrucoes = require("./instrucoes");
+const path = require("node:path");
+const { criarControle } = require("./controle-bot");
+const { instalarPainel } = require("./painel");
 
 const obrigatorias = [
   "WEBHOOK_VERIFY_TOKEN",
@@ -22,6 +25,11 @@ for (const nome of obrigatorias) {
 }
 
 const app = express();
+const controle = criarControle(process.env.BOT_STATE_FILE || path.join(__dirname, 'data', 'bot-state.json'));
+instalarPainel(app, controle, {
+  senha: process.env.BOT_ADMIN_PASSWORD,
+  seguro: process.env.NODE_ENV === 'production'
+});
 const porta = Number(process.env.PORT || 3000);
 const destinatario = process.env.WHATSAPP_TEST_RECIPIENT.replace(/\D/g, "");
 const telefoneId = process.env.WHATSAPP_PHONE_NUMBER_ID.trim();
@@ -52,7 +60,11 @@ function assinaturaValida(req) {
     crypto.timingSafeEqual(recebido, esperado);
 }
 
-async function enviar(texto) {
+async function enviar(texto, revisao) {
+  if (!controle.permitido(revisao)) {
+    console.log('[BOT] Resposta cancelada: horário ou controle alterado.');
+    return false;
+  }
   const versao = process.env.WHATSAPP_API_VERSION;
 
   const resposta = await fetch(
@@ -81,11 +93,14 @@ async function enviar(texto) {
     erro.codigoMeta = dados.error?.code;
     throw erro;
   }
+  return true;
 }
 
-async function atender(mensagem) {
+async function atender(mensagem, revisao) {
+  if (!controle.permitido(revisao)) return;
+  const responder = texto => enviar(texto, revisao);
   if (mensagem.type !== "text") {
-    await enviar("Neste teste consigo ler apenas texto. Pode digitar sua mensagem?");
+    await responder("Neste teste consigo ler apenas texto. Pode digitar sua mensagem?");
     return;
   }
 
@@ -94,17 +109,17 @@ async function atender(mensagem) {
 
   if (texto === "/novo") {
     historico = [];
-    await enviar("Conversa de teste reiniciada. Pode começar novamente!");
+    await responder("Conversa de teste reiniciada. Pode começar novamente!");
     return;
   }
 
   if (texto.length > 3000) {
-    await enviar("Para este teste, envie uma mensagem um pouco mais curta.");
+    await responder("Para este teste, envie uma mensagem um pouco mais curta.");
     return;
   }
 
   if (historico.length >= 40) {
-    await enviar("Limite desta conversa de teste atingido. Digite /novo.");
+    await responder("Limite desta conversa de teste atingido. Digite /novo.");
     return;
   }
 
@@ -135,7 +150,7 @@ CONTEXTO DESTE TESTE:
     throw new Error("Resposta incompleta da IA");
   }
 
-  await enviar(respostaTexto);
+  if (!await responder(respostaTexto)) return;
 
   historico = [
     ...entrada,
@@ -223,9 +238,16 @@ for (const mensagem of valor?.messages || []) {
 
           recebidas.set(mensagem.id, agora);
 
+          const estadoBot = controle.status();
+          if (!estadoBot.ativo) {
+            console.log('[BOT] Mensagem sem resposta automática:', estadoBot.motivo);
+            historico = [];
+            continue;
+          }
+
           // Processa em sequência para preservar a ordem da conversa.
           fila = fila
-            .then(() => atender(mensagem))
+            .then(() => atender(mensagem, estadoBot.revisao))
             .catch((erro) => {
               console.error(
                 "Falha no atendimento.",

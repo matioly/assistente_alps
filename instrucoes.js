@@ -21,9 +21,10 @@ CONTEXTO DA CONVERSA
 
 INFORMAÇÕES CONFIRMADAS
 - Nome da clínica: Alps Oral Clinic.
-- Automação desejada: segunda a sexta antes das 09:00 e a partir
-  das 18:15; sábado e domingo o dia todo; fuso America/Sao_Paulo.
-- Essa regra é de automação, não comprova o horário de consultas.
+- Atendimento da clínica: segunda a sexta, 09:00–12:00 e 13:00–18:00.
+- Automação: antes das 09:00, almoço das 12:00 às 13:00, a partir
+  das 18:00 e sábados/domingos completos; fuso America/Sao_Paulo.
+- A recepção pode ativar ou pausar temporariamente o bot.
 - Preços, convênios, profissionais disponíveis, duração de tratamentos,
   endereço e vagas de agenda não foram cadastrados nesta base.
 - Não invente essas informações, descontos ou avaliação gratuita.
@@ -33,9 +34,9 @@ BASE DA CLÍNICA
   Swiss Park, Campinas - SP, CEP 13049-252.
 - WhatsApp: (19) 3278-1121.
 - E-mail: alpsoralclinic@gmail.com.
-- Horário divulgado no site: segunda a sexta, das 09:00 às 18:00.
-- A automação começa às 18:15 nos dias úteis e funciona antes
-  das 09:00 e durante todo o sábado e domingo.
+- Horário confirmado: segunda a sexta, 09:00 às 18:00, com almoço
+  das 12:00 às 13:00; sábado e domingo fechado.
+- A automação funciona fora do expediente e durante o almoço.
 - Serviços divulgados: clínica geral, limpeza e prevenção,
   implantes, próteses, ortodontia, Invisalign, harmonização
   orofacial e odontopediatria.

@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Recepção | Alps Oral Clinic</title><link rel="stylesheet" href="/painel/style.css"><script src="/painel/app.js" defer></script></head>
+<body><main>
+<header><div><p class="marca">ALPS ORAL CLINIC</p><h1>Assistente do WhatsApp</h1></div><button id="sair" class="discreto" hidden>Sair</button></header>
+<form id="login" class="cartao" hidden><h2>Acesso da recepção</h2><label for="senha">Senha</label><input id="senha" type="password" autocomplete="current-password" required><button type="submit">Entrar</button></form>
+<section id="controle" hidden>
+<div class="cartao status"><p id="modo" class="marca"></p><h2 id="situacao">Consultando…</h2><p id="motivo"></p><p id="prazo"></p><p id="atualizacao" class="secundario"></p></div>
+<div class="cartao"><h2>Controle temporário</h2><label for="duracao">Por quanto tempo?</label><select id="duracao"><option value="30">30 minutos</option><option value="60" selected>1 hora</option><option value="120">2 horas</option></select><div class="acoes"><button data-modo="ativo">Ativar bot</button><button data-modo="pausado" class="pausar">Pausar bot</button></div><button data-modo="automatico" class="discreto automatico">Voltar ao automático</button><p class="secundario">Ao terminar o período, o bot volta à programação abaixo. A pausa impede novas respostas; mensagens já enviadas não podem ser recolhidas.</p></div>
+<div class="cartao"><h2>Programação automática</h2><dl><div><dt>Segunda a sexta · 09h–12h e 13h–18h</dt><dd>Recepção atende</dd></div><div><dt>Almoço · 12h–13h</dt><dd>Bot ativo</dd></div><div><dt>Noite · 18h–09h</dt><dd>Bot ativo</dd></div><div><dt>Sábados e domingos</dt><dd>Bot ativo o dia inteiro</dd></div></dl><p class="secundario">Horário de Campinas. Feriados seguem a programação do dia da semana.</p></div>
+</section><p id="aviso" role="status" aria-live="polite">Carregando…</p>
+</main></body></html>
