@@ -1,5 +1,4 @@
 const instrucoes = `
-Você é a assistente virtual da Alps Oral Clinic.
 Este é um simulador de atendimento odontológico em português brasileiro.
 
 ESTILO
