@@ -13,7 +13,6 @@ const obrigatorias = [
   "META_APP_SECRET",
   "OPENAI_API_KEY",
   "WHATSAPP_PHONE_NUMBER_ID",
-  "WHATSAPP_TEST_RECIPIENT",
   "WHATSAPP_ACCESS_TOKEN",
   "WHATSAPP_API_VERSION"
 ];
@@ -31,7 +30,7 @@ instalarPainel(app, controle, {
   seguro: process.env.NODE_ENV === 'production'
 });
 const porta = Number(process.env.PORT || 3000);
-const destinatario = process.env.WHATSAPP_TEST_RECIPIENT.replace(/\D/g, "");
+const destinatarioTeste = (process.env.WHATSAPP_TEST_RECIPIENT || "").replace(/\D/g, "");
 const telefoneId = process.env.WHATSAPP_PHONE_NUMBER_ID.trim();
 
 const openai = new OpenAI({
@@ -60,7 +59,7 @@ function assinaturaValida(req) {
     crypto.timingSafeEqual(recebido, esperado);
 }
 
-async function enviar(texto, revisao) {
+async function enviar(texto, revisao, destinatario) {
   if (!controle.permitido(revisao)) {
     console.log('[BOT] Resposta cancelada: horário ou controle alterado.');
     return false;
@@ -98,7 +97,7 @@ async function enviar(texto, revisao) {
 
 async function atender(mensagem, revisao) {
   if (!controle.permitido(revisao)) return;
-  const responder = texto => enviar(texto, revisao);
+  const responder = texto => enviar(texto, revisao, mensagem.from);
   if (mensagem.type !== "text") {
     await responder("Neste teste consigo ler apenas texto. Pode digitar sua mensagem?");
     return;
@@ -221,7 +220,7 @@ app.post(
 
 for (const mensagem of valor?.messages || []) {
   console.log("[MENSAGEM]", {
-    destinatarioPermitido: mensagem.from === destinatario,
+    destinatarioPermitido: !destinatarioTeste || mensagem.from === destinatarioTeste,
     tipo: mensagem.type,
     duplicada: recebidas.has(mensagem.id)
   });
@@ -233,7 +232,6 @@ for (const mensagem of valor?.messages || []) {
         }
 
         for (const mensagem of valor.messages || []) {
-          if (mensagem.from !== destinatario) continue;
           if (!mensagem.id || recebidas.has(mensagem.id)) continue;
 
           recebidas.set(mensagem.id, agora);
@@ -265,5 +263,5 @@ for (const mensagem of valor?.messages || []) {
 
 app.listen(porta, "0.0.0.0", () => {
   console.log(`Servidor Alps: http://localhost:${porta}`);
-  console.log("TESTE: responde apenas ao destinatário definido no .env.");
+  console.log(destinatarioTeste ? "TESTE: responde apenas ao destinatário definido no .env." : "BOT: responde a todos os números dentro do horário automático.");
 });
