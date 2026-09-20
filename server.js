@@ -39,7 +39,7 @@ const openai = new OpenAI({
   maxRetries: 0
 });
 
-let historico = [];
+const conversas = new Map();
 let fila = Promise.resolve();
 const recebidas = new Map();
 
@@ -98,6 +98,13 @@ async function enviar(texto, revisao, destinatario) {
 async function atender(mensagem, revisao) {
   if (!controle.permitido(revisao)) return;
   const responder = texto => enviar(texto, revisao, mensagem.from);
+  let conversa = conversas.get(mensagem.from);
+  if (!conversa) {
+    const nomes = ["Gabi", "Ana Julia", "Pamela"];
+    conversa = { historico: [], nome: nomes[crypto.randomInt(nomes.length)] };
+    conversas.set(mensagem.from, conversa);
+  }
+  const historico = conversa.historico;
   if (mensagem.type !== "text") {
     await responder("Neste teste consigo ler apenas texto. Pode digitar sua mensagem?");
     return;
@@ -107,7 +114,7 @@ async function atender(mensagem, revisao) {
   if (!texto) return;
 
   if (texto === "/novo") {
-    historico = [];
+    conversas.delete(mensagem.from);
     await responder("Conversa de teste reiniciada. Pode começar novamente!");
     return;
   }
@@ -124,7 +131,13 @@ async function atender(mensagem, revisao) {
 
   const entrada = [...historico, { role: "user", content: texto }];
 
-  const agora = new Date().toLocaleString("pt-BR", {
+  const instante = new Date();
+  const hora = Number(new Intl.DateTimeFormat("pt-BR", {
+    timeZone: "America/Sao_Paulo", hour: "2-digit", hourCycle: "h23"
+  }).format(instante));
+  const saudacao = hora >= 5 && hora < 12 ? "Bom dia" :
+    hora >= 12 && hora < 18 ? "Boa tarde" : "Boa noite";
+  const agora = instante.toLocaleString("pt-BR", {
     timeZone: "America/Sao_Paulo"
   });
 
@@ -133,6 +146,10 @@ async function atender(mensagem, revisao) {
     instructions: instrucoes + `
 CONTEXTO DESTE TESTE:
 - Data e hora em São Paulo: ${agora}.
+- Nome da assistente virtual nesta conversa: ${conversa.nome}.
+- Saudação para a primeira resposta: ${saudacao}.
+- Na primeira resposta, apresente-se: "${saudacao}! Sou a ${conversa.nome}, assistente virtual da Alps Oral Clinic."
+- Mantenha esse nome durante toda a conversa; não repita a apresentação a cada mensagem.
 - Você responde pelo WhatsApp de teste ao proprietário da clínica.
 - A recepção e a agenda ainda não estão conectadas.
 - Não afirme ter registrado ou encaminhado solicitações.
@@ -151,7 +168,7 @@ CONTEXTO DESTE TESTE:
 
   if (!await responder(respostaTexto)) return;
 
-  historico = [
+  conversa.historico = [
     ...entrada,
     { role: "assistant", content: respostaTexto }
   ];
@@ -239,7 +256,7 @@ for (const mensagem of valor?.messages || []) {
           const estadoBot = controle.status();
           if (!estadoBot.ativo) {
             console.log('[BOT] Mensagem sem resposta automática:', estadoBot.motivo);
-            historico = [];
+            conversas.delete(mensagem.from);
             continue;
           }
 
