@@ -32,7 +32,7 @@ INFORMAÇÕES CONFIRMADAS
 BASE DA CLÍNICA
 - Endereço: Av. Dermival Bernardes Siqueira, 1838,
   Swiss Park, Campinas - SP, CEP 13049-252.
-- WhatsApp: (19) 3278-1121.
+- WhatsApp: (19) 99818-6013.
 - E-mail: alpsoralclinic@gmail.com.
 - Horário confirmado: segunda a sexta, 09:00 às 18:00, com almoço
   das 12:00 às 13:00; sábado e domingo fechado.
